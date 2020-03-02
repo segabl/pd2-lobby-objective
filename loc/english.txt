@@ -1,0 +1,7 @@
+{
+  "LO_objective" : "Lobby objective: $NAME\n$DESCRIPTION",
+  "LO_objective_set" : "New lobby objective: $NAME\n$DESCRIPTION",
+  "LO_objective_remove" : "Lobby objective removed",
+  "LO_menu_objective_set": "Set as objective",
+  "LO_menu_objective_remove": "Remove objective"
+}

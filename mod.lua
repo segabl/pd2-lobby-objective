@@ -3,19 +3,21 @@ LobbyObjective.mod_path = ModPath
 LobbyObjective.save_path = SavePath
 LobbyObjective.settings = {}
 
-function LobbyObjective:set_objective(objective)
-  if not managers.chat then
-    return
-  end
-  local message
-  if not objective then
-    message = "Lobby objective removed"
-  else
-    local visual = tweak_data.achievement.visual[objective] or {}
-    message = string.format("New lobby objective: %s\n%s", managers.localization:to_upper_text(visual.name_id), managers.localization:text(visual.desc_id))
+function LobbyObjective:set_objective(objective, silent)
+  if Network:is_server() and managers.chat and not silent then
+    local message
+    if not objective then
+      message = managers.localization:text("LO_objective_remove")
+    else
+      local visual = tweak_data.achievement.visual[objective] or {}
+      message = managers.localization:text("LO_objective_set", {
+        NAME = managers.localization:to_upper_text(visual.name_id),
+        DESCRIPTION = managers.localization:text(visual.desc_id)
+      })
+    end
+    managers.chat:send_message(ChatManager.GAME, "System", message)
   end
 
-  managers.chat:send_message(ChatManager.GAME, "System", message)
   self.settings.objective = objective
   self:save()
 end
@@ -43,7 +45,7 @@ Hooks:PostHook(AchievementDetailGui, "init", "init_lo", function (self)
     placer:set_at(self._detail:left(), self._detail:bottom())
     placer:add_bottom(TextButton:new(self, {
       input = true,
-      text = LobbyObjective.settings.objective == self._id and "REMOVE OBJECTIVE" or "SET AS OBJECTIVE",
+      text = managers.localization:to_upper_text(LobbyObjective.settings.objective == self._id and "LO_menu_objective_remove" or "LO_menu_objective_set"),
       font = tweak_data.menu.pd2_medium_font,
       font_size = tweak_data.menu.pd2_medium_font_size
     }, function ()
@@ -56,17 +58,40 @@ end)
 
 Hooks:PostHook(MenuManager, "on_leave_active_job", "on_leave_active_job_lo", function ()
 
-  LobbyObjective:set_objective(nil)
+  LobbyObjective:set_objective(nil, true)
 
 end)
 
-Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnteredLobbyObjective", function (peer)
+Hooks:PostHook(MenuManager, "on_leave_lobby", "on_leave_lobby_lo", function ()
+
+  LobbyObjective:set_objective(nil, true)
+
+end)
+
+Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnteredLobbyLO", function (peer)
 
   if Network:is_server() and LobbyObjective.settings.objective then
     local visual = tweak_data.achievement.visual[LobbyObjective.settings.objective] or {}
-    local message = string.format("Lobby objective: %s\n%s", managers.localization:to_upper_text(visual.name_id), managers.localization:text(visual.desc_id))
+    local message = managers.localization:text("LO_objective", {
+      NAME = managers.localization:to_upper_text(visual.name_id),
+      DESCRIPTION = managers.localization:text(visual.desc_id)
+    })
     peer:send("send_chat_message", ChatManager.GAME, message)
   end
+
+end)
+
+Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInitLO", function(loc)
+
+  local loc_path = LobbyObjective.mod_path .. "loc/"
+  for _, filename in pairs(file.GetFiles(loc_path)) do
+    local str = filename:match("^(.+)%.txt$")
+    if str and Idstring(str):key() == SystemInfo:language():key() then
+      loc:load_localization_file(loc_path .. filename)
+      break
+    end
+  end
+  loc:load_localization_file(loc_path .. "english.txt", false)
 
 end)
 
