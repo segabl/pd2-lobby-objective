@@ -68,7 +68,7 @@ Hooks:PostHook(MenuManager, "on_leave_lobby", "on_leave_lobby_lo", function ()
 
 end)
 
-Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnteredLobbyLO", function (peer)
+Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnteredLobbyLO", function (peer, peer_id)
 
   if Network:is_server() and LobbyObjective.settings.objective then
     local visual = tweak_data.achievement.visual[LobbyObjective.settings.objective] or {}
@@ -76,7 +76,9 @@ Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnter
       NAME = managers.localization:to_upper_text(visual.name_id),
       DESCRIPTION = managers.localization:text(visual.desc_id)
     })
-    peer:send("send_chat_message", ChatManager.GAME, message)
+    DelayedCalls:Add("LO_notification_peer" .. peer_id, 1, function ()
+      return alive(peer) and peer:send("send_chat_message", ChatManager.GAME, message)
+    end)
   end
 
 end)
