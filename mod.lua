@@ -85,15 +85,34 @@ end)
 
 Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInitLO", function(loc)
 
-  local loc_path = LobbyObjective.mod_path .. "loc/"
-  for _, filename in pairs(file.GetFiles(loc_path)) do
-    local str = filename:match("^(.+)%.txt$")
-    if str and Idstring(str):key() == SystemInfo:language():key() then
-      loc:load_localization_file(loc_path .. filename)
+  local language = "english"
+  local system_language = HopLib:get_game_language()
+  local blt_language = BLT.Localization:get_language().language
+  local mod_language
+
+  local mod_language_table = {
+    ["PAYDAY 2 Translate in Portuguese Brazilian"] = "portuguese"
+  }
+  for _, mod in pairs(BLT and BLT.Mods:Mods() or {}) do
+    if mod:IsEnabled() and mod_language_table[mod:GetName()] then
+      mod_language = mod_language_table[mod:GetName()]
       break
     end
   end
-  loc:load_localization_file(loc_path .. "english.txt", false)
+
+  local loc_path = HopLib.mod_path .. "loc/"
+    if io.file_is_readable(loc_path .. system_language .. ".txt") then
+      language = system_language
+    end
+    if io.file_is_readable(loc_path .. blt_language .. ".txt") then
+      language = blt_language
+    end
+    if mod_language and io.file_is_readable(loc_path .. mod_language .. ".txt") then
+      language = mod_language
+    end
+
+    loc:load_localization_file(loc_path .. language .. ".txt")
+    loc:load_localization_file(loc_path .. "english.txt", false)
 
 end)
 
