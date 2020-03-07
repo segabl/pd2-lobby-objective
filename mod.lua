@@ -90,7 +90,7 @@ Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInitLO", functi
   local blt_language = BLT.Localization:get_language().language
   local mod_language = HopLib:get_modded_language()
 
-  local loc_path = HopLib.mod_path .. "loc/"
+  local loc_path = LobbyObjective.mod_path .. "loc/"
   if io.file_is_readable(loc_path .. system_language .. ".txt") then
     language = system_language
   end
