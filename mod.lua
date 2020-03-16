@@ -77,7 +77,8 @@ Hooks:Add("BaseNetworkSessionOnPeerEnteredLobby", "BaseNetworkSessionOnPeerEnter
       DESCRIPTION = managers.localization:text(visual.desc_id)
     })
     DelayedCalls:Add("LO_notification_peer" .. peer_id, 1, function ()
-      return alive(peer) and peer:send("send_chat_message", ChatManager.GAME, message)
+      local p = managers.network:session():peer(peer_id)
+      return p and p:send("send_chat_message", ChatManager.GAME, message)
     end)
   end
 
