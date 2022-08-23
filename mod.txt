@@ -5,12 +5,13 @@
 	"color" : "0.043 0.808 0.6",
 	"image" : "mod.png",
 	"version" : "1",
-	"updates" : [
-		{
+	"updates" : [{
 			"identifier" : "pd2-lobby-objective",
-			"host": { "meta": "http://updates.hoppip.at/pd2-lobby-objective" }
-		}
-	],
+			"host": { "meta" : "http://updates.hoppip.at/pd2-lobby-objective" }
+	}],
+	"dependencies" : {
+		"pd2-hoplib" : { "meta" : "https://updates.hoppip.at/pd2-hoplib" }
+	},
 	"hooks" : [
 		{ "hook_id" : "lib/managers/menumanager", "script_path" : "mod.lua" }
 	]
